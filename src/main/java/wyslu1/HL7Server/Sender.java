@@ -13,7 +13,12 @@ import ca.uhn.hl7v2.hoh.auth.SingleCredentialClientCallback;
 import ca.uhn.hl7v2.hoh.hapi.api.MessageSendable;
 import ca.uhn.hl7v2.hoh.hapi.client.HohClientSimple;
 import ca.uhn.hl7v2.model.Message;
-import ca.uhn.hl7v2.model.v26.message.ADT_A01;
+import ca.uhn.hl7v2.model.v26.datatype.NM;
+import ca.uhn.hl7v2.model.v26.group.ORU_R01_OBSERVATION;
+import ca.uhn.hl7v2.model.v26.group.ORU_R01_ORDER_OBSERVATION;
+import ca.uhn.hl7v2.model.v26.message.ORU_R01;
+import ca.uhn.hl7v2.model.v26.segment.OBR;
+import ca.uhn.hl7v2.model.v26.segment.OBX;
 import ca.uhn.hl7v2.parser.Parser;
 import ca.uhn.hl7v2.parser.PipeParser;
 
@@ -26,7 +31,7 @@ public class Sender {
 		 */
 		String host = "localhost";
 		int port = 8080;
-		String uri = "/AppContext";
+		String uri = "/Hl7Listener/Incoming";
 
 		// Create a parser
 		Parser parser = PipeParser.getInstanceWithNoValidation();
@@ -36,17 +41,38 @@ public class Sender {
 
 		// Optionally, if credentials should be sent, they 
 		// can be provided using a credential callback
-		IAuthorizationClientCallback authCalback = new SingleCredentialClientCallback("ausername", "somepassword");
-		client.setAuthorizationCallback(authCalback);
-
+//		IAuthorizationClientCallback authCalback = new SingleCredentialClientCallback("ausername", "somepassword");
+//		client.setAuthorizationCallback(authCalback);
 		// The ISendable defines the object that provides the actual
-		// message to send
-		ADT_A01 adt = new ADT_A01();
-		adt.initQuickstart("ADT", "A01", "T");
-		// .. set other values on the message ..
+				// message to send
+				ORU_R01 oru = new ORU_R01();
+				oru.initQuickstart("ORU", "R01", "T");
 
-		// The MessageSendable provides the message to send 
-		ISendable sendable = new MessageSendable(adt);
+				ORU_R01_ORDER_OBSERVATION orderObservation = oru.getPATIENT_RESULT().getORDER_OBSERVATION();
+
+				// Populate the OBR
+				OBR obr = orderObservation.getOBR();
+				obr.getSetIDOBR().setValue("1");
+				obr.getFillerOrderNumber().getEntityIdentifier().setValue("1234");
+				obr.getFillerOrderNumber().getNamespaceID().setValue("LAB");
+				obr.getUniversalServiceIdentifier().getIdentifier().setValue("88304");
+
+				ORU_R01_OBSERVATION observation = orderObservation.getOBSERVATION(0);
+				OBX obx = observation.getOBX();
+				obx.getSetIDOBX().setValue("1");
+				obx.getObservationIdentifier().getIdentifier().setValue("88304");
+				obx.getObservationSubID().setValue("1");
+
+				obx.getValueType().setValue("NM");
+				NM nm = new NM(oru);
+				nm.setValue("CREATININE");
+				// Varies value = obx.getObservationValue(0);
+				// value.setData(nm);
+				System.out.println(oru.encode());
+				// .. set other values on the message ..
+
+				// The MessageSendable provides the message to send
+				ISendable sendable = new MessageSendable(oru);
 
 		try {
 		        // sendAndReceive actually sends the message
