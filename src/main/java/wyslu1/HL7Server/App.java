@@ -1,44 +1,55 @@
 package wyslu1.HL7Server;
 
-import javax.servlet.Servlet;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.util.Scanner;
 
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.ServletHolder;
+import ca.uhn.hl7v2.util.Hl7InputStreamMessageIterator;
 
-/**
- * Hello world!
- *
- */
-public class App 
-{
-    public static void main( String[] args ) throws Exception
-    {
-    	// The port to listen on
-    	int port = 8080;
+public class App{
+	
+	private static Scanner userInput = new Scanner(System.in);
+	private static Sender sender;
+	private static Receiver receiver = new Receiver();
+	private static ReceiverServer receiverServer = new ReceiverServer(8080, "HL7","incoming", receiver );
+	
+	
+	public static void main(String[] args) throws Exception {
+		sender = new Sender("localhost", 8080, "HL7/incoming");
+		System.out.println("Welcome to the Lab Höheweg");
+		command();
 
-    	// Create a Jetty server instance
-    	Server server = new Server(port);
-    	Context context = new Context(server, "/Hl7Listener", Context.SESSIONS);
-    	Servlet servlet = new Receiver();
+		
+	}
 
-    	/* 
-    	 * Adds the servlet to listen at 
-    	 * http://localhost:8080/Hl7Listener/Incoming
-    	 */
-    	context.addServlet(new ServletHolder(servlet), "/Incoming");
-
-    	// Start the server
-    	server.start();
-
-    	// .. let the application run ..
-
-    	/*
-    	 * Later it will probably be appropriate to shut the server
-    	 * down.
-    	 */
-    	//server.stop();
-    	
-    	Sender sender = new Sender();
-    }
+	public static String input() {
+		
+		String input = userInput.nextLine();
+		return input.toLowerCase();
+	}
+	
+	public static void command() throws FileNotFoundException
+	{
+		System.out.println("please enter command:");
+		switch (input()) {
+		case "read":
+			System.out.println("specify filename to read:");
+			FileReader reader = new FileReader(input());
+			Hl7InputStreamMessageIterator iterator = new Hl7InputStreamMessageIterator(reader);
+			System.out.println("the following messages have been found:");
+			int i = 1;
+			while(iterator.hasNext())
+			{
+				System.out.println(i+". message is:");
+				System.out.println(iterator.next());
+				i++;
+			}
+			command();
+		break;
+		case "send":
+			
+			command();
+		break;
+		}
+	}
 }

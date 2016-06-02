@@ -1,5 +1,6 @@
 wyslu1\HL7Server\Receiver$1.class
 wyslu1\HL7Server\App.class
 wyslu1\HL7Server\Receiver$MessageHandler.class
+wyslu1\HL7Server\ReceiverServer.class
 wyslu1\HL7Server\Receiver.class
 wyslu1\HL7Server\Sender.class
