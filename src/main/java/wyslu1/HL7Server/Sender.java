@@ -55,6 +55,7 @@ public class Sender {
 		        System.out.println("Response was:\n" + message.encode());
 		        
 		        // IReceivable also stores metadata about the message
+		        
 		        String remoteHostIp = (String) receivable.getMetadata().get(MessageMetadataKeys.REMOTE_HOST_ADDRESS);
 		        System.out.println("From:\n" + remoteHostIp);
 		        

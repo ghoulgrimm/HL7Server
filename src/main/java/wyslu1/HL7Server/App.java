@@ -2,12 +2,18 @@ package wyslu1.HL7Server;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.Scanner;
 
+import ca.uhn.hl7v2.HL7Exception;
+import ca.uhn.hl7v2.hoh.hapi.api.MessageSendable;
+import ca.uhn.hl7v2.model.Message;
+import ca.uhn.hl7v2.parser.EncodingNotSupportedException;
 import ca.uhn.hl7v2.util.Hl7InputStreamMessageIterator;
 
 public class App{
 	
+	private static ArrayList<Message> msgs = new ArrayList<Message>();
 	private static Scanner userInput = new Scanner(System.in);
 	private static Sender sender;
 	private static Receiver receiver = new Receiver();
@@ -15,7 +21,10 @@ public class App{
 	
 	
 	public static void main(String[] args) throws Exception {
-		sender = new Sender("localhost", 8080, "HL7/incoming");
+		
+		sender = new Sender("localhost", 8080, "/HL7/incoming");
+		receiverServer.start();
+		
 		System.out.println("Welcome to the Lab Höheweg");
 		command();
 
@@ -33,6 +42,7 @@ public class App{
 		System.out.println("please enter command:");
 		switch (input()) {
 		case "read":
+			msgs.clear();
 			System.out.println("specify filename to read:");
 			FileReader reader = new FileReader(input());
 			Hl7InputStreamMessageIterator iterator = new Hl7InputStreamMessageIterator(reader);
@@ -40,14 +50,27 @@ public class App{
 			int i = 1;
 			while(iterator.hasNext())
 			{
+				Message msg = iterator.next();
+				msgs.add(msg);
 				System.out.println(i+". message is:");
-				System.out.println(iterator.next());
+				System.out.println(msg);
 				i++;
 			}
 			command();
 		break;
 		case "send":
-			
+			for(Message msg : msgs)
+			{
+			try {
+				sender.send(new MessageSendable(msg));
+			} catch (EncodingNotSupportedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (HL7Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			}
 			command();
 		break;
 		}
