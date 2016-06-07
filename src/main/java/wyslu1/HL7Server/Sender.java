@@ -31,9 +31,9 @@ public class Sender {
 	
 	public Sender(String host, int port, String uri) throws HL7Exception, IOException{
 		
-		host = host;
-		port = port;
-		uri = uri;
+		this.host = host;
+		this.port = port;
+		this.uri = uri;
 		
 		// Create a parser
 		Parser parser = PipeParser.getInstanceWithNoValidation();
@@ -50,7 +50,7 @@ public class Sender {
 		        // sendAndReceive actually sends the message
 		        IReceivable<Message> receivable = client.sendAndReceiveMessage(sendable);
 		        
-		        // receivavle.getRawMessage() provides the response
+		        // receivable.getRawMessage() provides the response
 		        Message message = receivable.getMessage();
 		        System.out.println("Response was:\n" + message.encode());
 		        

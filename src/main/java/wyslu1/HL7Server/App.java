@@ -48,12 +48,18 @@ public class App{
 			Hl7InputStreamMessageIterator iterator = new Hl7InputStreamMessageIterator(reader);
 			System.out.println("the following messages have been found:");
 			int i = 1;
+
 			while(iterator.hasNext())
 			{
 				Message msg = iterator.next();
 				msgs.add(msg);
 				System.out.println(i+". message is:");
-				System.out.println(msg);
+				try {
+					System.out.println(msg.encode());
+				} catch (HL7Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				i++;
 			}
 			command();

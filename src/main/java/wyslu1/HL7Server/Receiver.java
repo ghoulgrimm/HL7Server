@@ -9,7 +9,7 @@ import ca.uhn.hl7v2.hoh.api.MessageProcessingException;
 import ca.uhn.hl7v2.hoh.raw.api.RawSendable;
 import ca.uhn.hl7v2.hoh.raw.server.HohRawServlet;
 import ca.uhn.hl7v2.model.Message;
-import ca.uhn.hl7v2.parser.PipeParser;
+import ca.uhn.hl7v2.parser.Parser;
 import ca.uhn.hl7v2.validation.builder.support.NoValidationBuilder;
 
 public class Receiver extends HohRawServlet{
@@ -28,8 +28,8 @@ public class Receiver extends HohRawServlet{
 		
 			HapiContext ctx = new DefaultHapiContext();
 			ctx.setValidationRuleBuilder(new NoValidationBuilder());
-			PipeParser parser = new PipeParser();
-			parser.setValidationContext(ctx.getValidationContext());
+			Parser parser = ctx.getGenericParser();
+	
 
 			Message message = null;
 			Message ack = null;
@@ -38,11 +38,13 @@ public class Receiver extends HohRawServlet{
 				message = parser.parse(incomingRawMsg);
 				ack = message.generateACK();
 				response = ack.encode();
+			
 			} catch (Exception e) {
-				return new RawSendable("MSH|lol");
+				return new RawSendable(response);
 				
 			} 
-			return new RawSendable(response);
+			RawSendable rs = new RawSendable(response); 
+			return rs;
 	            }
             
            
